@@ -1,1 +1,2 @@
-Hello, GCP Git!
+1. DataDL
+volume의 경우 조회 시점에 따라 마지막 데이터는 불완전할 수 있음. 하루 정도 shift해서 사용할 필요가 있을수도.
