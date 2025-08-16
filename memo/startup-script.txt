@@ -1,0 +1,22 @@
+#!/bin/bash
+
+GCS_BUCKET="snp-project-bucket"
+MOUNT_POINT="/home/kdywwww1/snp_project/bucket"
+
+if ! command -v gcsfuse &> /dev/null
+then
+    export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
+    echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    sudo apt-get update
+    sudo apt-get install -y gcsfuse
+fi
+
+sudo mkdir -p $MOUNT_POINT
+/usr/bin/gcsfuse -o allow_other \
+                 --uid=1001 \
+                 --gid=1002 \
+                 --implicit-dirs \
+                 --dir-mode=770 \
+                 --file-mode=770 \
+                 $GCS_BUCKET $MOUNT_POINT

@@ -1,0 +1,20 @@
+# 0. EDA
+## 도커 이미지 재생성
+docker rmi snp-eda-image
+docker build -t snp-eda-image -f Dockerfile.EDA .
+
+## 도커 컨테이너 생성
+docker run -it --rm -v /home/kdywwww1/snp_project:/app --name snp-eda-container snp-eda-image /bin/bash
+-- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
+
+# 1. DataDL
+## 도커 이미지 재생성
+docker rmi snp-datadl-image
+cd DataDL
+docker build -t snp-datadl-image -f Dockerfile.DataDL .
+
+## 도커 컨테이너 생성
+docker run -it --rm -v /home/kdywwww1/snp_project/DataDL:/app -v /home/kdywwww1/snp_project/bucket:/bucket -v /home/kdywwww1/snp_project/logs/DataDL:/logs --name snp-datadl-container snp-datadl-image /bin/bash
+-- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
+
+docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
