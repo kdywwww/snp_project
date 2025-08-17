@@ -3,6 +3,11 @@
 GCS_BUCKET="snp-project-bucket"
 MOUNT_POINT="/home/kdywwww1/snp_project/bucket"
 
+until curl -s -f --connect-timeout 1 http://metadata.google.internal; do
+    echo "Waiting for network..."
+    sleep 2
+done
+
 if ! command -v gcsfuse &> /dev/null
 then
     export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
@@ -14,8 +19,8 @@ fi
 
 sudo mkdir -p $MOUNT_POINT
 /usr/bin/gcsfuse -o allow_other \
-                 --uid=1001 \
-                 --gid=1002 \
+                 --uid=1000 \
+                 --gid=1001 \
                  --implicit-dirs \
                  --dir-mode=770 \
                  --file-mode=770 \
