@@ -18,3 +18,9 @@ docker run -it --rm -v /home/kdywwww1/snp_project/DataDL:/app -v /home/kdywwww1/
 -- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
 
 docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
+
+# 2. FullPipeline
+## 도커 이미지 재생성
+docker rmi snp-fullpipeline-image
+cd CloudRun
+docker build -t snp-fullpipeline-image -f Dockerfile.FullPipeline .

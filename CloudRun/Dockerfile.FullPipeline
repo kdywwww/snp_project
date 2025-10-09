@@ -1,0 +1,12 @@
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements_FullPipeline.txt .
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements_FullPipeline.txt
+
+COPY main_Full.py .
+
+CMD ["python", "main_Full.py"]
