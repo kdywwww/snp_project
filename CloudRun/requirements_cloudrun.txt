@@ -1,0 +1,3 @@
+# GCP VM Instance
+google-api-python-client==2.184.0
+loguru==0.7.3

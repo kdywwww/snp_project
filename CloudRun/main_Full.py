@@ -17,7 +17,7 @@ until curl -s -f --connect-timeout 1 http://metadata.google.internal; do
     sleep 2
 done
 echo "Connected to metadata server."
-sleep 20
+sleep 60
 gcloud compute instances delete {VM_NAME} --zone={ZONE} --quiet 
 """
 
@@ -40,6 +40,12 @@ def get_vm_config():
         "networkInterfaces": [
             {
                 "network": "global/networks/default",
+                "accessConfigs": [
+                    {
+                        "type": "ONE_TO_ONE_NAT",
+                        "name": "External NAT",
+                    }
+                ],
             }
         ],
         "serviceAccounts": [
@@ -65,7 +71,7 @@ def run_vm_workflow():
         ).execute()
 
         # 2. VM의 작업이 완료될 때까지 대기
-        for i in range(5):  # 5분 (5 * 60초) 대기
+        for i in range(10):
             time.sleep(60)
             try:
                 # VM이 존재하는지 확인 (삭제되면 예외 발생)
