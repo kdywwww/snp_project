@@ -23,4 +23,6 @@ docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
 ## 도커 이미지 재생성
 docker rmi snp-fullpipeline-image
 cd CloudRun
-docker build -t snp-fullpipeline-image -f Dockerfile.FullPipeline .
+docker build --no-cache -t snp-fullpipeline-image -f Dockerfile.FullPipeline .
+## 도커 컨테이너 생성
+docker run --rm snp-fullpipeline-image

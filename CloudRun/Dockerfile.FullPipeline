@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements_FullPipeline.txt
 
 COPY main_Full.py .
 
-CMD ["python", "main_Full.py"]
+CMD ["python", "-u", "main_Full.py"]
