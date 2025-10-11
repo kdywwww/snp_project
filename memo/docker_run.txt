@@ -10,22 +10,27 @@ docker build -t snp-eda-image -f Dockerfile.EDA .
 docker run -it --rm -v /home/kdywwww1/snp_project:/app --name snp-eda-container snp-eda-image /bin/bash
 -- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
 
-# 1. DataDL
-## 도커 이미지 재생성
-docker rmi snp-datadl-image
-cd DataDL
-docker build -t snp-datadl-image -f Dockerfile.DataDL .
-
-## 도커 컨테이너 생성
-docker run -it --rm -v /home/kdywwww1/snp_project/DataDL:/app -v /home/kdywwww1/snp_project/bucket:/bucket -v /home/kdywwww1/snp_project/logs/DataDL:/logs --name snp-datadl-container snp-datadl-image /bin/bash
--- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
-
-docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
-
-# 2. FullPipeline
+# 1. FullPipeline
 ## 도커 이미지 재생성
 docker rmi snp-full-image
 cd CloudRun
 docker build --no-cache -t snp-full-image -f Dockerfile.Full .
 ## 도커 컨테이너 생성
 docker run --rm snp-full-image
+
+# 3. DataDL
+## 도커 이미지 재생성
+docker rmi snp-datadl-image
+cd DataDL
+docker build --no-cache -t snp-datadl-image -f Dockerfile.DataDL .
+
+## 도커 컨테이너 생성 (기본)
+docker run --rm snp-datadl-image
+## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 실행 시)
+docker run --rm -v /home/kdywwww1/snp_project/bucket:/bucket snp-datadl-image
+## 과거 버젼
+docker run -it --rm -v /home/kdywwww1/snp_project/DataDL:/app -v /home/kdywwww1/snp_project/bucket:/bucket -v /home/kdywwww1/snp_project/logs/DataDL:/logs --name snp-datadl-container snp-datadl-image /bin/bash
+-- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
+
+docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
+

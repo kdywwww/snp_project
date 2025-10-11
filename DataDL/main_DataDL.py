@@ -8,16 +8,21 @@ import pytz
 from loguru import logger
 from twelvedata import TDClient
 
-# 변수 및 경로 설정
+# 변수 설정
 timestamp_str = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y%m%d_%H%M%S")
 API_KEY = "45d1cfb01d4d4677a1a158bd46a97b84"
 MAX_BACKUP_NUM = 2
 
+# 디렉터리 설정
+# (사전에 GCS 버킷 snp-project-bucket이 /bucket에 마운트 되어 있어야 함)
 data_dir = "/bucket/data/raw_data"
 backup_dir = os.path.join(data_dir, "backups")
-twelve_dict = {"SPY": ["spy_data.csv"], "USD/KRW": ["usdkrw_data.csv"]}
 log_dir = "/logs"
+os.makedirs(log_dir, exist_ok=True)
 bucket_log_dir = "/bucket/logs/DataDL"
+
+# 대상 파일명 설정
+twelve_dict = {"SPY": ["spy_data.csv"], "USD/KRW": ["usdkrw_data.csv"]}
 log_filename = f"log_datadl_{timestamp_str}.log"
 
 

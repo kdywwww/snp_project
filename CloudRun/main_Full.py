@@ -8,10 +8,12 @@ PROJECT_ID = "long-centaur-402106"
 ZONE = "us-central1-a"
 VM_MACHINE_TYPE = "n1-standard-4"
 VM_NAME = "full-vm"
+VM_END_MIN = 10
 # GCS BUCKET 설정
 GCS_BUCKET = "snp-project-bucket"
 BUCKET_MOUNT_POINT = "/bucket"
-# MLOPS_SCRIPT_PATH = "run_mlops.sh"
+
+# VM startup script
 STARTUP_SCRIPT = f"""#!/bin/bash
 set -x
 
@@ -102,7 +104,7 @@ def run_vm_workflow():
         ).execute()
 
         # 2. VM의 작업이 완료될 때까지 대기
-        for i in range(10):
+        for i in range(VM_END_MIN):
             time.sleep(60)
             try:
                 # VM이 존재하는지 확인 (삭제되면 예외 발생)

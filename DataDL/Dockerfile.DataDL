@@ -7,6 +7,6 @@ COPY requirements_DataDL.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements_DataDL.txt
 
-COPY . .
+COPY main_DataDL.py .
 
-CMD ["python"]
+CMD ["python", "-u", "main_DataDL.py"]
