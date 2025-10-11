@@ -1,3 +1,6 @@
+# 도커 이미지, 컨테이너 삭제 (용량 확보)
+docker system prune
+
 # 0. EDA
 ## 도커 이미지 재생성
 docker rmi snp-eda-image
@@ -21,8 +24,8 @@ docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
 
 # 2. FullPipeline
 ## 도커 이미지 재생성
-docker rmi snp-fullpipeline-image
+docker rmi snp-full-image
 cd CloudRun
-docker build --no-cache -t snp-fullpipeline-image -f Dockerfile.FullPipeline .
+docker build --no-cache -t snp-full-image -f Dockerfile.Full .
 ## 도커 컨테이너 생성
-docker run --rm snp-fullpipeline-image
+docker run --rm snp-full-image

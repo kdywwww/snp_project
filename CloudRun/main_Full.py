@@ -3,21 +3,52 @@ import time
 import googleapiclient.discovery
 import googleapiclient.errors
 
+# GCP VM 설정
 PROJECT_ID = "long-centaur-402106"
-ZONE = "us-central1-a"  # VM을 생성할 GCP Zone
+ZONE = "us-central1-a"
 VM_MACHINE_TYPE = "n1-standard-4"
-VM_NAME = "fullpipeline-vm"
-# # 실제 MLOps 코드가 담긴 GCS 버킷 및 파일 경로
+VM_NAME = "full-vm"
+# GCS BUCKET 설정
 GCS_BUCKET = "snp-project-bucket"
+BUCKET_MOUNT_POINT = "/bucket"
 # MLOPS_SCRIPT_PATH = "run_mlops.sh"
 STARTUP_SCRIPT = f"""#!/bin/bash
 set -x
+
+GCS_BUCKET="{GCS_BUCKET}"
+BUCKET_MOUNT_POINT="{BUCKET_MOUNT_POINT}"
+
+echo "Waiting for network..."
 until curl -s -f --connect-timeout 1 http://metadata.google.internal; do
     echo "Waiting for network..."
-    sleep 2
+    sleep 5
 done
-echo "Connected to metadata server."
+echo "Network is up."
+
+echo "Check and install gcsfuse if not installed"
+if ! command -v gcsfuse &> /dev/null
+then
+    export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
+    echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    sudo apt-get update
+    sudo apt-get install -y gcsfuse
+fi
+
+echo "Start mounting GCS bucket to $BUCKET_MOUNT_POINT"
+sudo mkdir -p $BUCKET_MOUNT_POINT
+/usr/bin/gcsfuse -o allow_other \
+                 --uid=1000 \
+                 --gid=1001 \
+                 --implicit-dirs \
+                 --dir-mode=770 \
+                 --file-mode=770 \
+                 $GCS_BUCKET $BUCKET_MOUNT_POINT
+echo "End mounting GCS bucket to $BUCKET_MOUNT_POINT"
+
 sleep 60
+
+echo "Start delete VM instance"
 gcloud compute instances delete {VM_NAME} --zone={ZONE} --quiet 
 """
 
@@ -91,12 +122,12 @@ def run_vm_workflow():
     finally:
         # VM이 만약 남아있다면 강제 삭제 (보험용)
         try:
-            print(f"FINALLY 블록에서 VM {VM_NAME} 강제 삭제 시작.")
             compute.instances().delete(
                 project=PROJECT_ID, zone=ZONE, instance=VM_NAME
             ).execute()
+            print(f"FINALLY 블록에서 VM {VM_NAME} 삭제.")
         except:
-            pass  # 이미 삭제되었거나 다른 오류 발생 시 무시
+            pass
 
 
 if __name__ == "__main__":
