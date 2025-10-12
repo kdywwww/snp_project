@@ -10,7 +10,7 @@ from twelvedata import TDClient
 
 # 변수 설정
 timestamp_str = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y%m%d_%H%M%S")
-API_KEY = "45d1cfb01d4d4677a1a158bd46a97b84"
+TD_API_KEY = "45d1cfb01d4d4677a1a158bd46a97b84"
 MAX_BACKUP_NUM = 2
 
 # 디렉터리 설정
@@ -71,7 +71,7 @@ def clean_old_backups(file_dir, filename, max_num):
 
 try:
     # TwelveData
-    td = TDClient(apikey=API_KEY)
+    td = TDClient(apikey=TD_API_KEY)
     for symbol in twelve_dict.keys():
         # target
         logger.info(f"Start: [TwelveData {symbol}]")

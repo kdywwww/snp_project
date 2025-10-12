@@ -1,5 +1,7 @@
 # 도커 이미지, 컨테이너 삭제 (용량 확보)
 docker system prune
+# 전체 이미지 강제 삭제 (주의)
+docker rmi -f $(docker images -a -q)
 
 # 0. EDA
 ## 도커 이미지 재생성
@@ -23,7 +25,6 @@ docker run --rm snp-full-image
 docker rmi snp-datadl-image
 cd DataDL
 docker build --no-cache -t snp-datadl-image -f Dockerfile.DataDL .
-
 ## 도커 컨테이너 생성 (기본)
 docker run --rm snp-datadl-image
 ## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 실행 시)
