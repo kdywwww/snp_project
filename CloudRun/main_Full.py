@@ -8,7 +8,8 @@ PROJECT_ID = "long-centaur-402106"
 ZONE = "us-central1-a"
 VM_MACHINE_TYPE = "n1-standard-4"
 VM_NAME = "full-vm"
-VM_MAX_MIN = 10
+VM_MAX_MIN = 15
+SERVICE_ACCOUNT_EMAIL = "1047168964134-compute@developer.gserviceaccount.com"
 # GCS BUCKET 설정
 GCS_BUCKET = "snp-project-bucket"
 BUCKET_MOUNT_POINT = "/bucket"
@@ -23,6 +24,21 @@ set -x
 
 GCS_BUCKET="{GCS_BUCKET}"
 BUCKET_MOUNT_POINT="{BUCKET_MOUNT_POINT}"
+LOG_FILENAME="log_full_ss_$(date +%Y%m%d%H%M%S).log"
+LOG_PATH="/tmp/$LOG_FILENAME"
+
+exec > >(tee -a ${{LOG_PATH}}) 2>&1
+
+copy_logs_and_delete_vm() {{
+    echo "Start copying final logs to GCS. After this, the VM will be deleted."
+    GCS_LOG_PATH="${{BUCKET_MOUNT_POINT}}/logs/Full/${{LOG_FILENAME}}"
+    cp $LOG_PATH $GCS_LOG_PATH || true
+
+    sleep 60
+    gcloud compute instances delete {VM_NAME} --zone={ZONE} --quiet 
+}}
+
+trap copy_logs_and_delete_vm EXIT
 
 echo "Waiting for network..."
 until curl -s -f --connect-timeout 1 http://metadata.google.internal; do
@@ -31,6 +47,10 @@ until curl -s -f --connect-timeout 1 http://metadata.google.internal; do
 done
 echo "Network is up."
 
+VM_ID=$(curl -s -H "Metadata-Flavor:Google" http://metadata.google.internal/computeMetadata/v1/instance/id)
+echo "VM name: {VM_NAME}"
+echo "VM ID: $VM_ID"
+
 echo "Start installing gcsfuse"
 export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
 echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
@@ -38,11 +58,6 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install -y gcsfuse
 echo "End installing gcsfuse"
-
-echo "Start installing docker"
-sudo apt-get update
-sudo apt-get install -y docker.io
-echo "End installing docker"
 
 echo "Start mounting GCS bucket to $BUCKET_MOUNT_POINT"
 sudo mkdir -p $BUCKET_MOUNT_POINT
@@ -55,6 +70,11 @@ sudo mkdir -p $BUCKET_MOUNT_POINT
                  $GCS_BUCKET $BUCKET_MOUNT_POINT
 echo "End mounting GCS bucket to $BUCKET_MOUNT_POINT"
 
+echo "Start installing docker"
+sudo apt-get update
+sudo apt-get install -y docker.io
+echo "End installing docker"
+
 echo "Start authenticating Artifact Registry Docker"
 gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 echo "End authenticating Artifact Registry Docker"
@@ -64,11 +84,6 @@ sudo docker run --rm \
     -v $BUCKET_MOUNT_POINT:/bucket \
     {DATADL_IMAGE}
 echo "End DataDL"
-
-sleep 60
-
-echo "Start delete VM instance"
-gcloud compute instances delete {VM_NAME} --zone={ZONE} --quiet 
 """
 
 
@@ -100,7 +115,7 @@ def get_vm_config():
         ],
         "serviceAccounts": [
             {
-                "email": "1047168964134-compute@developer.gserviceaccount.com",
+                "email": f"{SERVICE_ACCOUNT_EMAIL}",
                 "scopes": ["https://www.googleapis.com/auth/cloud-platform"],
             }
         ],
