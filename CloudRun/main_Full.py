@@ -8,10 +8,14 @@ PROJECT_ID = "long-centaur-402106"
 ZONE = "us-central1-a"
 VM_MACHINE_TYPE = "n1-standard-4"
 VM_NAME = "full-vm"
-VM_END_MIN = 10
+VM_MAX_MIN = 10
 # GCS BUCKET 설정
 GCS_BUCKET = "snp-project-bucket"
 BUCKET_MOUNT_POINT = "/bucket"
+# Artifact Registry 설정
+DATADL_IMAGE = (
+    "us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadl-image:v0.2"
+)
 
 # VM startup script
 STARTUP_SCRIPT = f"""#!/bin/bash
@@ -27,15 +31,18 @@ until curl -s -f --connect-timeout 1 http://metadata.google.internal; do
 done
 echo "Network is up."
 
-echo "Check and install gcsfuse if not installed"
-if ! command -v gcsfuse &> /dev/null
-then
-    export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
-    echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-    sudo apt-get update
-    sudo apt-get install -y gcsfuse
-fi
+echo "Start installing gcsfuse"
+export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
+echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y gcsfuse
+echo "End installing gcsfuse"
+
+echo "Start installing docker"
+sudo apt-get update
+sudo apt-get install -y docker.io
+echo "End installing docker"
 
 echo "Start mounting GCS bucket to $BUCKET_MOUNT_POINT"
 sudo mkdir -p $BUCKET_MOUNT_POINT
@@ -48,6 +55,16 @@ sudo mkdir -p $BUCKET_MOUNT_POINT
                  $GCS_BUCKET $BUCKET_MOUNT_POINT
 echo "End mounting GCS bucket to $BUCKET_MOUNT_POINT"
 
+echo "Start authenticating Artifact Registry Docker"
+gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+echo "End authenticating Artifact Registry Docker"
+
+echo "Start DataDL"
+sudo docker run --rm \
+    -v $BUCKET_MOUNT_POINT:/bucket \
+    {DATADL_IMAGE}
+echo "End DataDL"
+
 sleep 60
 
 echo "Start delete VM instance"
@@ -56,7 +73,7 @@ gcloud compute instances delete {VM_NAME} --zone={ZONE} --quiet
 
 
 def get_vm_config():
-    """n1-standard-16 VM 설정을 반환합니다."""
+    """VM 설정을 반환합니다."""
 
     config = {
         "name": VM_NAME,
@@ -93,25 +110,27 @@ def get_vm_config():
 
 
 def run_vm_workflow():
-    """VM 생성 및 삭제를 제어하는 메인 워크플로."""
+    """VM 생성, startup script 실행 및 삭제를 제어하는 메인 워크플로."""
     compute = googleapiclient.discovery.build("compute", "v1")
 
     try:
         # 1. VM 생성 및 startup script 실행
-        print(f"VM {VM_NAME} 생성 및 코드 실행 시작")
+        print(f"VM {VM_NAME} 생성 및 startup script 실행 시작")
         compute.instances().insert(
             project=PROJECT_ID, zone=ZONE, body=get_vm_config()
         ).execute()
 
         # 2. VM의 작업이 완료될 때까지 대기
-        for i in range(VM_END_MIN):
+        for i in range(VM_MAX_MIN):
             time.sleep(60)
             try:
                 # VM이 존재하는지 확인 (삭제되면 예외 발생)
                 compute.instances().get(
                     project=PROJECT_ID, zone=ZONE, instance=VM_NAME
                 ).execute()
-                print(f"VM {VM_NAME}이 아직 실행 중입니다... ({i+1}분 경과)")
+                print(
+                    f"VM {VM_NAME}이 아직 실행 중입니다... ({i+1}분 경과)(최대 {VM_MAX_MIN}분)"
+                )
             except googleapiclient.errors.HttpError as e:
                 if e.resp.status == 404:
                     print(f"VM {VM_NAME}이 삭제되었음을 확인했습니다. 작업 완료.")
@@ -119,7 +138,9 @@ def run_vm_workflow():
                 raise e
 
         # 이 부분에 도달하면 시간 초과
-        raise TimeoutError(f"VM {VM_NAME}이 시간 내에 작업을 완료하지 못했습니다.")
+        raise TimeoutError(
+            f"VM {VM_NAME}이 최대 시간 {VM_MAX_MIN}분 내에 작업을 완료하지 못했습니다."
+        )
 
     finally:
         # VM이 만약 남아있다면 강제 삭제 (보험용)
