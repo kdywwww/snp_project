@@ -1,4 +1,3 @@
-import glob
 import os
 import shutil
 from datetime import datetime
@@ -24,7 +23,7 @@ bucket_log_dir = "/bucket/logs/DataDL"
 
 # 대상 파일명 설정
 twelve_dict = {"SPY": ["spy_data.csv"], "USD/KRW": ["usdkrw_data.csv"]}
-log_filename = f"log_datadl_{timestamp_str}.log"
+log_filename = f"log_datadl_td_{timestamp_str}.log"
 
 
 # 로그 설정 (로그 파일에 기록)
