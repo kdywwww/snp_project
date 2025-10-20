@@ -1,0 +1,13 @@
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements_DataDL_OECD.txt .
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements_DataDL_OECD.txt
+
+COPY src /app/src
+COPY main_DataDL_OECD.py .
+
+CMD ["python", "-u", "main_DataDL_OECD.py"]
