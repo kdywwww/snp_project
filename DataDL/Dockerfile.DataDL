@@ -2,11 +2,12 @@ FROM python:3.8
 
 WORKDIR /app
 
-COPY requirements_DataDL.txt .
+COPY requirements_DataDL_TD.txt .
 
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements_DataDL.txt
+RUN pip install --no-cache-dir -r requirements_DataDL_TD.txt
 
-COPY main_DataDL.py .
+COPY src .
+COPY main_DataDL_TD.py .
 
-CMD ["python", "-u", "main_DataDL.py"]
+CMD ["python", "-u", "main_DataDL_TD.py"]
