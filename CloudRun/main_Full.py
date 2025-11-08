@@ -14,12 +14,16 @@ SERVICE_ACCOUNT_EMAIL = "1047168964134-compute@developer.gserviceaccount.com"
 GCS_BUCKET = "snp-project-bucket"
 BUCKET_MOUNT_POINT = "/bucket"
 # Artifact Registry 설정
-DATADL_IMAGE = (
-    "us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadl-image:v0.2"
+DATADLTD_IMAGE = (
+    "us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadltd-image:v0.1"
+)
+DATADLOECD_IMAGE = (
+    "us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadloecd-image:v0.1"
 )
 
 # VM startup script
 STARTUP_SCRIPT = f"""#!/bin/bash
+set -e
 set -x
 
 GCS_BUCKET="{GCS_BUCKET}"
@@ -79,11 +83,17 @@ echo "Start authenticating Artifact Registry Docker"
 gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 echo "End authenticating Artifact Registry Docker"
 
-echo "Start DataDL"
+echo "Start DataDLTD"
 sudo docker run --rm \
     -v $BUCKET_MOUNT_POINT:/bucket \
-    {DATADL_IMAGE}
-echo "End DataDL"
+    {DATADLTD_IMAGE}
+echo "End DataDLTD"
+
+echo "Start DataDLLOECD"
+sudo docker run --rm \
+    -v $BUCKET_MOUNT_POINT:/bucket \
+    {DATADLOECD_IMAGE}
+echo "End DataDLLOECD"
 """
 
 

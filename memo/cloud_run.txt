@@ -3,11 +3,14 @@
 ## 1.1. 로컬 도커 인증 (처음 한번만)
 gcloud auth configure-docker us-central1-docker.pkg.dev
 
-## 1.2. 이미지 태그 지정(마지막 태그엔 버전 관리)
+(선행 : 각 이미지가 로컬에 존재)
+## 1.2. 이미지 태그 지정(마지막 태그엔 버전 관리)(full-image가 마지막)
 # 경로 형식: [리전]-docker.pkg.dev/[프로젝트 ID]/[저장소 이름]/[이미지 이름]:[태그]
-docker tag snp-full-image us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-full-image:v0.3
-docker tag snp-datadl-image us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadl-image:v0.2
+docker tag snp-datadltd-image us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadltd-image:v0.1
+docker tag snp-datadloecd-image us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadloecd-image:v0.1
+docker tag snp-full-image us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-full-image:v0.4
 
-## 1.3. 이미지 푸쉬(마지막 태그엔 버전 관리)
-docker push us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-full-image:v0.3
-docker push us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadl-image:v0.2
+## 1.3. 이미지 푸쉬(마지막 태그엔 버전 관리)(full-image가 마지막)
+docker push us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadltd-image:v0.1
+docker push us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-datadloecd-image:v0.1
+docker push us-central1-docker.pkg.dev/long-centaur-402106/snp-repo/snp-full-image:v0.4

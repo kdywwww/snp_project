@@ -6,7 +6,7 @@ docker rmi -f $(docker images -a -q)
 # 0. EDA
 ## 도커 이미지 재생성
 docker rmi snp-eda-image
-docker build -t snp-eda-image -f Dockerfile.EDA .
+docker build --no-cache -t snp-eda-image -f Dockerfile.EDA .
 docker build --no-cache -t snp-eda-image -f Dockerfile.EDAlight .
 
 ## 도커 컨테이너 생성
@@ -24,6 +24,7 @@ docker run --rm snp-full-image
 # 3. DataDL
 ## 도커 이미지 재생성
 docker rmi snp-datadltd-image
+docker rmi snp-datadloecd-image
 cd DataDL
 docker build --no-cache -t snp-datadltd-image -f Dockerfile.DataDLTD .
 docker build --no-cache -t snp-datadloecd-image -f Dockerfile.DataDLOECD .
@@ -31,6 +32,7 @@ docker build --no-cache -t snp-datadloecd-image -f Dockerfile.DataDLOECD .
 docker run --rm snp-datadltd-image
 ## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 실행 시)
 docker run --rm -v /home/kdywwww1/snp_project/bucket:/bucket snp-datadltd-image
+docker run --rm -v /home/kdywwww1/snp_project/bucket:/bucket snp-datadloecd-image
 ## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 상호작용 실행 시)
 docker run -it --rm -v /home/kdywwww1/snp_project:/app snp-datadloecd-image
 -- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
