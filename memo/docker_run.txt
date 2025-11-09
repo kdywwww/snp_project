@@ -21,7 +21,7 @@ docker build --no-cache -t snp-full-image -f Dockerfile.Full .
 ## 도커 컨테이너 생성
 docker run --rm snp-full-image
 
-# 3. DataDL
+# 2. DataDL
 ## 도커 이미지 재생성
 docker rmi snp-datadltd-image
 docker rmi snp-datadloecd-image
@@ -37,5 +37,13 @@ docker run --rm -v /home/kdywwww1/snp_project/bucket:/bucket snp-datadloecd-imag
 docker run -it --rm -v /home/kdywwww1/snp_project:/app snp-datadloecd-image
 -- jupyter Open : Ctrl+Shift+P - Dev Containers: Attacth to running container
 
-docker run -it -v $(pwd):/app --name snp-eda-container snp-eda-image /bin/bash
+# 3. Preprocess
+## 도커 이미지 재생성
+docker rmi snp-prepd-image
+cd Preprocess
+docker build --no-cache -t snp-prepd-image -f Dockerfile.prep_D .
+## 도커 컨테이너 생성 (기본)
+docker run --rm snp-prepd-image
+## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 실행 시)
+docker run --rm -v /home/kdywwww1/snp_project/bucket:/bucket snp-prepd-image
 

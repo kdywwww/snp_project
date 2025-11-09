@@ -1,0 +1,13 @@
+FROM python:3.12
+
+WORKDIR /app
+
+COPY requirements_prep_D.txt .
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements_prep_D.txt
+
+COPY src /app/src
+COPY main_prep_D.py .
+
+CMD ["python", "-u", "main_prep_D.py"]
