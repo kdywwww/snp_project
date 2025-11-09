@@ -50,6 +50,7 @@ try:
     spy_df.ta.sma(close="spy_close", length=60, append=True)
     spy_df.ta.sma(close="spy_close", length=120, append=True)
     spy_df.ta.bbands(close="spy_close", length=20, std=2, append=True)
+    spy_df.columns = spy_df.columns.str.replace("_2.0_2.0", "", regex=False)
     spy_df.ta.macd(close="spy_close", fast=12, slow=26, signal=9, append=True)
     spy_df.ta.rsi(close="spy_close", length=14, append=True)
     # Volume Lag Feature 생성
