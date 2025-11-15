@@ -1,3 +1,6 @@
+# 도커 설치
+VM OS에 맞춰 "debian docker install"을 검색하여 참조
+
 # 도커 이미지, 컨테이너 삭제 (용량 확보)
 docker system prune
 # 전체 이미지 강제 삭제 (주의)
