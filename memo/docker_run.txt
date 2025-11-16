@@ -50,3 +50,11 @@ docker run --rm snp-prepd-image
 ## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 실행 시)
 docker run --rm -v /home/kdywwww1/snp_project/bucket:/bucket snp-prepd-image
 
+# 4. Modeling
+## 도커 이미지 재생성
+docker rmi snp-tft-image
+cd Modeling
+docker build --no-cache -t snp-tft-image -f Dockerfile.tft .
+## 도커 컨테이너 생성 (SNP_PROJECT VM 인스턴스 내에서 상호작용 실행 시)
+docker run -it --rm -v /home/kdywwww1/snp_project:/app snp-tft-image /bin/bash
+
